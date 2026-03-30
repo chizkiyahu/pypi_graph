@@ -266,6 +266,7 @@ describe('resolver integration', () => {
     expect(graph.nodes[0]?.displayVersion).toBe('1.0.1')
     expect(graph.edges).toHaveLength(2)
     expect(graph.limits.networkRequests).toBe(3)
+    expect(graph.limits.cacheHits).toBe(2)
     expect(progressUpdates).toContain('loading-metadata')
     expect(progressUpdates).toContain('analyzing-environment')
     expect(progressUpdates).toContain('resolving-graph')
@@ -1017,5 +1018,101 @@ describe('resolver integration', () => {
 
     expect(graph.nodes.some((node) => node.normalizedName === 'text-unidecode' && node.kind === 'package')).toBe(true)
     expect(graph.nodes.some((node) => node.normalizedName === 'text-unidecode' && node.kind === 'unresolved')).toBe(false)
+  })
+
+  it('does not deadlock while analyzing cyclic dependencies', async () => {
+    const fixtures = new Map<string, object>([
+      [
+        'https://pypi.org/pypi/demo/json',
+        {
+          info: {
+            name: 'demo',
+            version: '1.0.0',
+            summary: 'demo root',
+            requires_dist: ['dep>=1'],
+            requires_python: '>=3.11',
+            provides_extra: null,
+            package_url: 'https://pypi.org/project/demo/',
+          },
+          releases: {
+            '1.0.0': [
+              {
+                filename: 'demo-1.0.0.tar.gz',
+                packagetype: 'sdist',
+                python_version: 'source',
+                requires_python: '>=3.11',
+                yanked: false,
+              },
+            ],
+          },
+        },
+      ],
+      [
+        'https://pypi.org/pypi/dep/json',
+        {
+          info: {
+            name: 'dep',
+            version: '1.0.0',
+            summary: 'dep child',
+            requires_dist: ['demo>=1'],
+            requires_python: '>=3.11',
+            provides_extra: null,
+            package_url: 'https://pypi.org/project/dep/',
+          },
+          releases: {
+            '1.0.0': [
+              {
+                filename: 'dep-1.0.0.tar.gz',
+                packagetype: 'sdist',
+                python_version: 'source',
+                requires_python: '>=3.11',
+                yanked: false,
+              },
+            ],
+          },
+        },
+      ],
+    ])
+
+    const fetcher = async (input: RequestInfo | URL) => {
+      const key = String(input)
+      const data = fixtures.get(key)
+      if (!data) {
+        return new Response('Not found', { status: 404 })
+      }
+      return new Response(JSON.stringify(data), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    }
+
+    const client = createPypiClient({
+      cache: new MemoryCacheStore(),
+      fetcher,
+      ttlMs: 1000 * 60 * 60,
+    })
+
+    const graph = await Promise.race([
+      resolveDependencyGraph(
+        {
+          packageName: 'demo',
+          rootVersion: null,
+          pythonVersion: '3.12',
+          platform: 'linux-x86_64',
+          extras: [],
+          manualVersions: {},
+        },
+        client,
+      ),
+      new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('cyclic environment analysis timed out')), 250)
+      }),
+    ])
+
+    expect(graph.nodes.map((node) => node.packageName)).toEqual(['demo', 'dep'])
+    expect(graph.edges).toHaveLength(2)
+    expect(graph.limits.cycleEdges).toBe(1)
   })
 })

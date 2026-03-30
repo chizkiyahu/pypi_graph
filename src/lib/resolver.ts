@@ -449,7 +449,7 @@ async function deriveRootOptions(
   const selectedVersionFiles =
     rootProject.releases[selectedOrDefaultVersion] ?? rootProject.releases[rootProject.info.version] ?? []
   const pythonPool = buildPythonCandidatePool(inputs.pythonVersion, selectedVersionFiles)
-  const compatibility = await buildResolvedCompatibilityMatrix(
+  const environmentAnalysis = await analyzeResolvedEnvironmentSupport(
     {
       name: rootProject.info.name,
       normalizedName: normalizePackageName(rootProject.info.name),
@@ -464,6 +464,7 @@ async function deriveRootOptions(
     state,
     rootProject,
   )
+  const compatibility = compatibilityMatrixFromCombos(environmentAnalysis.supportedCombos)
 
   let supportedPlatforms = deriveSupportedPlatforms(compatibility, inputs.pythonVersion)
   let effectivePlatform = pickSupportedPlatform(inputs.platform, supportedPlatforms)
@@ -475,21 +476,8 @@ async function deriveRootOptions(
   supportedPythonVersions = deriveSupportedPythonVersions(compatibility, effectivePlatform, pythonPool)
   effectivePythonVersion = pickSupportedPythonVersion(effectivePythonVersion, supportedPythonVersions)
 
-  const signatures = collectEnvironmentSignatures(
-    compatibility,
-    {
-      name: rootProject.info.name,
-      normalizedName: normalizePackageName(rootProject.info.name),
-      specifiers: [],
-      requirementTexts: [],
-      selectedExtras: sanitizedExtras,
-      depth: 0,
-    },
-    pythonPool,
-    inputs,
-    client,
-      state,
-      rootProject,
+  const signatures = Promise.resolve(
+    filterEnvironmentSignatures(environmentAnalysis.signatures, compatibility),
   )
   const [pythonSensitive, platformSensitive] = await Promise.all([
     hasEnvironmentVariation(
@@ -591,15 +579,15 @@ function deriveSupportedPlatforms(
   return compatibility.allPlatforms
 }
 
-async function buildResolvedCompatibilityMatrix(
+async function analyzeResolvedEnvironmentSupport(
   request: ResolveRequest,
   pythonPool: string[],
   inputs: ResolutionInputs,
   client: PypiClient,
   state: ResolverState,
   preloadedProject?: PypiProjectResponse,
-): Promise<CompatibilityMatrix> {
-  const analysis = await analyzeEnvironmentSupport(
+): Promise<EnvironmentAnalysisResult> {
+  return analyzeEnvironmentSupport(
     request,
     {
       client,
@@ -611,34 +599,14 @@ async function buildResolvedCompatibilityMatrix(
     new Set<string>(),
     preloadedProject,
   )
-
-  return compatibilityMatrixFromCombos(analysis.supportedCombos)
 }
 
-async function collectEnvironmentSignatures(
+function filterEnvironmentSignatures(
+  signatures: Map<string, string>,
   compatibility: CompatibilityMatrix,
-  request: ResolveRequest,
-  pythonPool: string[],
-  inputs: ResolutionInputs,
-  client: PypiClient,
-  state: ResolverState,
-  preloadedProject?: PypiProjectResponse,
-): Promise<Map<string, string>> {
-  const analysis = await analyzeEnvironmentSupport(
-    request,
-    {
-      client,
-      inputs,
-      pythonPool,
-      memo: new Map<string, Promise<EnvironmentAnalysisResult>>(),
-      state,
-    },
-    new Set<string>(),
-    preloadedProject,
-  )
-
+): Map<string, string> {
   return new Map(
-    [...analysis.signatures.entries()].filter(([key]) => {
+    [...signatures.entries()].filter(([key]) => {
       const [pythonVersion, platform] = parseEnvironmentKey(key)
       return (
         compatibility.pythonToPlatforms.get(pythonVersion)?.has(platform) ??
@@ -655,16 +623,16 @@ async function analyzeEnvironmentSupport(
   preloadedProject?: PypiProjectResponse,
 ): Promise<EnvironmentAnalysisResult> {
   const memoKey = makeEnvironmentMemoKey(request, context.inputs)
-  const existing = context.memo.get(memoKey)
-  if (existing) {
-    return existing
-  }
-
   if (path.has(memoKey)) {
     return {
       supportedCombos: buildAllEnvironmentCombos(context.pythonPool),
       signatures: new Map(),
     }
+  }
+
+  const existing = context.memo.get(memoKey)
+  if (existing) {
+    return existing
   }
 
   const nextPath = new Set(path)
