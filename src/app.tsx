@@ -198,9 +198,9 @@ export function App() {
 
         <main class="landing-stage">
           <section class="panel landing-card">
-            <p class="eyebrow">PyPI atlas</p>
+            <p class="eyebrow">PyPI DepGraph</p>
             <h1>Enter a package name.</h1>
-            <p class="landing-copy">Build the graph first. Advanced settings appear only after the package metadata is loaded.</p>
+            <p class="landing-copy">Visualize the full dependency tree. Advanced settings appear after the package metadata loads.</p>
 
             <form class="landing-form" onSubmit={handleSubmit}>
               <input
@@ -235,9 +235,9 @@ export function App() {
             ) : null}
 
             <div class="landing-footer">
-              <a href="https://github.com/chizkiyahu/pypi_graph" target="_blank" rel="noopener noreferrer" class="social-link">
+              <a href="https://github.com/chizkiyahu/pypi_graph" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="View source code on GitHub">
                 <svg width="20" height="20" aria-hidden="true"><use href="/icons.svg#github-icon" /></svg>
-                View on GitHub
+                Source on GitHub
               </a>
             </div>
           </section>
@@ -480,9 +480,10 @@ export function App() {
             ))}
           </div>
           <div class="drawer-footer-links">
-            <a href="https://github.com/chizkiyahu/pypi_graph" target="_blank" rel="noopener noreferrer" class="social-link">
+            <a href="https://github.com/chizkiyahu/pypi_graph" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="View source code on GitHub">
               <svg width="20" height="20" aria-hidden="true"><use href="/icons.svg#github-icon" /></svg>
-              GitHub Repository
+              Source on GitHub
+              <svg width="14" height="14" aria-hidden="true" class="external-arrow"><use href="/icons.svg#external-link-icon" /></svg>
             </a>
           </div>
         </div>
@@ -501,8 +502,9 @@ export function App() {
             <div class="graph-stage-title">
               <div class="title-with-link">
                 <p class="section-kicker">Dependency graph</p>
-                <a href="https://github.com/chizkiyahu/pypi_graph" target="_blank" rel="noopener noreferrer" class="social-link desktop-title-link" title="View source on GitHub">
-                  <svg width="20" height="20" aria-hidden="true"><use href="/icons.svg#github-icon" /></svg>
+                <a href="https://github.com/chizkiyahu/pypi_graph" target="_blank" rel="noopener noreferrer" class="social-link desktop-title-link" title="View source on GitHub" aria-label="View source on GitHub">
+                  <svg width="18" height="18" aria-hidden="true"><use href="/icons.svg#github-icon" /></svg>
+                  <svg width="14" height="14" aria-hidden="true" class="external-arrow"><use href="/icons.svg#external-link-icon" /></svg>
                 </a>
               </div>
               <h2>{result.effectiveInputs.packageName} graph</h2>

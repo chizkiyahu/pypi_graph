@@ -1,10 +1,10 @@
-# PyPI Resolver Atlas
+# PyPI DepGraph
 
-Static GitHub Pages app for exploring recursive PyPI dependency graphs.
+Interactive dependency graph explorer for Python PyPI packages. Deployed as a static GitHub Pages site.
 
 ## Features
 
-- Enter a PyPI package name and resolve its dependency graph from the PyPI JSON API.
+- Enter a PyPI package name and resolve its full dependency graph using the PyPI JSON API.
 - Evaluate extras, Python version markers, and platform markers in-browser.
 - Rebuild the graph when the top-level Python version, platform, or extras change.
 - Manually pin displayed dependency versions when the selected version is still legal under the active constraints.

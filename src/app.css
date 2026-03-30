@@ -309,6 +309,15 @@
   color: var(--ink);
 }
 
+.external-arrow {
+  opacity: 0.5;
+  transition: opacity 160ms ease;
+}
+
+.social-link:hover .external-arrow {
+  opacity: 0.85;
+}
+
 .menu-toggle {
   position: absolute;
   top: 20px;
