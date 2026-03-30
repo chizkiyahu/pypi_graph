@@ -601,10 +601,41 @@
   border: 0;
 }
 
+.mobile-meta {
+  display: none;
+}
+
+.desktop-meta {
+  display: flex;
+}
+
 @media (max-width: 960px) {
   .graph-stage-header {
     flex-direction: column;
     padding-left: 72px;
+  }
+
+  .desktop-meta {
+    display: none;
+  }
+
+  .mobile-meta {
+    display: grid;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+
+  .drawer-meta-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .drawer-meta-content .stage-metrics {
+    justify-content: flex-start;
   }
 
   .graph-stage-meta {

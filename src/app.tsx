@@ -246,6 +246,28 @@ export function App() {
     { label: 'Cache hits', value: result.limits.cacheHits },
   ]
 
+  const renderMeta = () => (
+    <>
+      <div class="stage-badges stage-metrics">
+        {graphMetrics.map((metric) => (
+          <span class="summary-chip metric-chip">
+            <strong>{metric.value}</strong> {metric.label}
+          </span>
+        ))}
+      </div>
+      <div class="stage-badges">
+        {activeEnvironment.map((item) => (
+          <span class="summary-chip">{item}</span>
+        ))}
+      </div>
+      <div class="stage-badges">
+        <span class="summary-chip">{result.limits.cycleEdges} cycle edges</span>
+        <span class="summary-chip">{result.limits.unresolvedNodes} unresolved</span>
+        <span class="summary-chip">{result.limits.skippedDirectReferences} direct refs</span>
+      </div>
+    </>
+  )
+
   return (
     <div class="shell workspace-shell">
       <div class="ambient ambient-left" />
@@ -434,6 +456,13 @@ export function App() {
           </div>
         </form>
 
+        <div class="drawer-meta mobile-meta">
+          <span class="subtle-label">Graph metadata</span>
+          <div class="drawer-meta-content">
+            {renderMeta()}
+          </div>
+        </div>
+
         <div class="drawer-footer">
           <span class="subtle-label">Quick starts</span>
           <div class="drawer-samples">
@@ -464,24 +493,8 @@ export function App() {
               </p>
             </div>
 
-            <div class="graph-stage-meta">
-              <div class="stage-badges stage-metrics">
-                {graphMetrics.map((metric) => (
-                  <span class="summary-chip metric-chip">
-                    <strong>{metric.value}</strong> {metric.label}
-                  </span>
-                ))}
-              </div>
-              <div class="stage-badges">
-                {activeEnvironment.map((item) => (
-                  <span class="summary-chip">{item}</span>
-                ))}
-              </div>
-              <div class="stage-badges">
-                <span class="summary-chip">{result.limits.cycleEdges} cycle edges</span>
-                <span class="summary-chip">{result.limits.unresolvedNodes} unresolved</span>
-                <span class="summary-chip">{result.limits.skippedDirectReferences} direct refs</span>
-              </div>
+            <div class="graph-stage-meta desktop-meta">
+              {renderMeta()}
             </div>
           </div>
 
