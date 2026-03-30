@@ -565,7 +565,16 @@ function NodeInspector(props: NodeInspectorProps) {
         <div>
           <p class="section-kicker">Inspector</p>
           <p class="node-title">
-            {props.node.packageName} <span>{props.node.displayVersion}</span>
+            <a
+              href={`https://pypi.org/project/${props.node.packageName}/${props.node.displayVersion}/`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="pypi-link"
+              title={`View ${props.node.packageName} ${props.node.displayVersion} on PyPI`}
+            >
+              {props.node.packageName} <span>{props.node.displayVersion}</span>
+              <svg width="14" height="14" aria-hidden="true" class="external-arrow"><use href="/icons.svg#external-link-icon" /></svg>
+            </a>
           </p>
         </div>
         <button class="icon-button" type="button" onClick={props.onClose}>

@@ -584,6 +584,29 @@
   color: var(--accent-ink);
 }
 
+.pypi-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  text-decoration: none;
+  color: inherit;
+  transition: color 160ms ease;
+}
+
+.pypi-link:hover {
+  color: var(--accent);
+}
+
+.pypi-link .external-arrow {
+  align-self: center;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.pypi-link:hover .external-arrow {
+  opacity: 0.7;
+}
+
 .field {
   display: grid;
   gap: 8px;
