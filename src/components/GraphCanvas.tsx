@@ -75,9 +75,9 @@ function buildGraphStyles(isDark: boolean) {
       style: {
         'border-width': '4px',
         'border-color': isDark ? '#fff3c4' : '#10372b',
-        'shadow-blur': 24,
-        'shadow-color': isDark ? '#f2b66c' : '#dc8b35',
-        'shadow-opacity': 0.28,
+        'underlay-color': isDark ? '#f2b66c' : '#dc8b35',
+        'underlay-opacity': 0.28,
+        'underlay-padding': '12px',
       },
     },
     {
@@ -94,7 +94,9 @@ function buildGraphStyles(isDark: boolean) {
         'line-color': edgeColor,
         'target-arrow-color': edgeColor,
         'target-arrow-shape': 'triangle',
-        'curve-style': 'bezier',
+        'curve-style': 'unbundled-bezier',
+        'control-point-distances': [40],
+        'control-point-weights': [0.5],
         label: 'data(label)',
         'font-size': '13px',
         'font-weight': 600,
@@ -125,6 +127,15 @@ function buildGraphStyles(isDark: boolean) {
   ] as cytoscape.StylesheetJson
 }
 
+function rotateBreadthfirstPosition(position: cytoscape.Position): cytoscape.Position {
+  const { x: verticalAxis, y: horizontalAxis } = position
+
+  return {
+    x: horizontalAxis,
+    y: verticalAxis,
+  }
+}
+
 export function GraphCanvas(props: GraphCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const cytoscapeRef = useRef<cytoscape.Core | null>(null)
@@ -142,6 +153,10 @@ export function GraphCanvas(props: GraphCanvasProps) {
         minZoom: 0.15,
         maxZoom: 3.2,
         style: buildGraphStyles(prefersDarkTheme()),
+        // Use preset (no-op) as the default layout so Cytoscape never runs
+        // GridLayout automatically when elements are added via .json().
+        // The explicit breadthfirst layout is always called right after .json().
+        layout: { name: 'preset' },
       })
 
     cytoscapeRef.current = instance
@@ -201,21 +216,18 @@ export function GraphCanvas(props: GraphCanvasProps) {
       padding: props.nodes.length > 80 ? 28 : 36,
       spacingFactor:
         props.nodes.length > 140
-          ? 0.66
+          ? 0.72
           : props.nodes.length > 80
-            ? 0.74
+            ? 0.82
             : props.nodes.length > 40
-              ? 0.82
-              : 0.92,
+              ? 0.90
+              : 1.0,
       avoidOverlap: true,
       nodeDimensionsIncludeLabels: true,
       grid: false,
       transform: (_node, position) =>
         props.direction === 'left-right'
-          ? {
-              x: position.y,
-              y: position.x,
-            }
+          ? rotateBreadthfirstPosition(position)
           : position,
     }).run()
   }, [props.nodes, props.edges, props.rootId, props.direction])
