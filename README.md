@@ -2,7 +2,7 @@
 
 **Free online tool to visualize Python package dependency trees.** Enter any PyPI package name and instantly explore its full dependency graph — resolve versions, extras, platform constraints, and pip install chains interactively in your browser. No installation required.
 
-🔗 **[Live Demo →](https://chizkiyahu.github.io/pypi_graph/)**
+🔗 **[Live Demo →]([https://chizkiyahu.github.io/pypi-depgraph/])**
 
 ## Why use this?
 
