@@ -291,6 +291,24 @@ export function App() {
     }
   }
 
+  function handleDownloadResult(format: 'json' | 'md') {
+    if (!result) {
+      return
+    }
+
+    const safeName = normalizePackageName(result.effectiveInputs.packageName || 'dependency-graph')
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+    const extension = format === 'json' ? 'json' : 'md'
+    const filename = `${safeName}-dependency-graph-${timestamp}.${extension}`
+    const content =
+      format === 'json'
+        ? JSON.stringify(createSerializableResult(result), null, 2)
+        : createMarkdownReport(result)
+    const mimeType = format === 'json' ? 'application/json' : 'text/markdown'
+
+    downloadTextFile(filename, content, mimeType)
+  }
+
   useEffect(() => {
     if (syncingInputsRef.current) {
       syncingInputsRef.current = false
@@ -632,6 +650,14 @@ export function App() {
             ))}
           </div>
           <div class="drawer-footer-links">
+            <div class="export-actions">
+              <button class="graph-tool" type="button" onClick={() => handleDownloadResult('json')}>
+                Export JSON
+              </button>
+              <button class="graph-tool" type="button" onClick={() => handleDownloadResult('md')}>
+                Export Markdown
+              </button>
+            </div>
             <a href="https://github.com/chizkiyahu/pypi_graph" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="View source code on GitHub">
               <svg width="20" height="20" aria-hidden="true"><use href="#github-icon" /></svg>
               Source on GitHub
@@ -674,6 +700,12 @@ export function App() {
                 GitHub
                 <svg width="14" height="14" aria-hidden="true" class="external-arrow"><use href="#external-link-icon" /></svg>
               </a>
+              <button class="graph-tool" type="button" onClick={() => handleDownloadResult('json')}>
+                Export JSON
+              </button>
+              <button class="graph-tool" type="button" onClick={() => handleDownloadResult('md')}>
+                Export Markdown
+              </button>
             </div>
           </div>
 
@@ -920,4 +952,77 @@ function collectActiveEnvironment(
   }
 
   return summary
+}
+
+function createSerializableResult(result: ResolutionResult) {
+  return {
+    generatedAt: new Date().toISOString(),
+    packageName: result.effectiveInputs.packageName,
+    effectiveInputs: result.effectiveInputs,
+    rootId: result.rootId,
+    nodes: result.nodes,
+    edges: result.edges,
+    insights: result.insights,
+    limits: result.limits,
+    rootOptions: result.rootOptions,
+  }
+}
+
+function createMarkdownReport(result: ResolutionResult): string {
+  const lines: string[] = []
+  lines.push(`# Dependency Graph Report: ${result.effectiveInputs.packageName}`)
+  lines.push('')
+  lines.push(`Generated: ${new Date().toISOString()}`)
+  lines.push('')
+  lines.push('## Resolution inputs')
+  lines.push('')
+  lines.push(`- Package: \`${result.effectiveInputs.packageName}\``)
+  lines.push(`- Root version: \`${result.effectiveInputs.rootVersion ?? 'latest stable'}\``)
+  lines.push(`- Python: \`${result.effectiveInputs.pythonVersion}\``)
+  lines.push(`- Platform: \`${result.effectiveInputs.platform}\``)
+  lines.push(
+    `- Extras: ${result.effectiveInputs.extras.length ? result.effectiveInputs.extras.map((extra) => `\`${extra}\``).join(', ') : 'none'}`,
+  )
+  lines.push('')
+  lines.push('## Graph summary')
+  lines.push('')
+  lines.push(`- Nodes: **${result.nodes.length}**`)
+  lines.push(`- Edges: **${result.edges.length}**`)
+  lines.push(`- API calls: **${result.limits.networkRequests}**`)
+  lines.push(`- Cache hits: **${result.limits.cacheHits}**`)
+  lines.push(`- Unresolved nodes: **${result.limits.unresolvedNodes}**`)
+  lines.push(`- Cycle edges: **${result.limits.cycleEdges}**`)
+  lines.push('')
+  lines.push('## Nodes')
+  lines.push('')
+  lines.push('| Package | Version | Kind | Depth | Requires Python |')
+  lines.push('| --- | --- | --- | ---: | --- |')
+  for (const node of result.nodes) {
+    lines.push(
+      `| ${node.packageName} | ${node.displayVersion} | ${node.kind} | ${node.depth} | ${node.requiresPython ?? '—'} |`,
+    )
+  }
+  lines.push('')
+  lines.push('## Edges')
+  lines.push('')
+  lines.push('| From | To | Requirement |')
+  lines.push('| --- | --- | --- |')
+  for (const edge of result.edges) {
+    lines.push(`| ${edge.source} | ${edge.target} | \`${edge.requirement}\` |`)
+  }
+  lines.push('')
+
+  return lines.join('\n')
+}
+
+function downloadTextFile(filename: string, content: string, mimeType: string) {
+  const blob = new Blob([content], { type: `${mimeType};charset=utf-8` })
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = filename
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
+  URL.revokeObjectURL(url)
 }

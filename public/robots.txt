@@ -1,5 +1,10 @@
-User-agent: *
+User-Agent: *
 Allow: /
 
-Sitemap: https://chizkiyahu.github.io/pypi_graph/sitemap.xml
+User-Agent: GPTBot
+Allow: /
 
+User-Agent: ClaudeBot
+Allow: /
+
+Sitemap: https://chizkiyahu.github.io/pypi-depgraph/sitemap.xml

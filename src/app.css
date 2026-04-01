@@ -563,6 +563,13 @@
   margin-top: 12px;
 }
 
+.export-actions {
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-right: 12px;
+}
+
 .landing-footer {
   justify-content: center;
   margin-top: 8px;

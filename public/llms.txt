@@ -1,0 +1,30 @@
+# LLM Guide: use https://chizkiyahu.github.io/pypi-depgraph without manual UI
+
+This website is a client-side app (no backend API endpoint). To use it without manual UI, run it in a headless browser and control it with URL params + DOM automation.
+
+## Base URL
+https://chizkiyahu.github.io/pypi-depgraph/
+
+## Query parameters (state contract)
+- `package`: PyPI package name (required to auto-run resolution)
+- `version`: root package version (optional)
+- `python`: python version string (example: `3.11`)
+- `platform`: platform marker target (example: `linux`)
+- `extras`: comma-separated extras (example: `standard,dev`)
+- `overrides`: comma-separated `name:version` pairs (example: `urllib3:2.2.2,idna:3.7`)
+
+Example URL:
+https://chizkiyahu.github.io/pypi-depgraph/?package=fastapi&python=3.11&platform=linux&extras=standard
+
+## Headless workflow (no manual clicks)
+1. Open the URL with your desired params in a browser automation tool (Playwright/Puppeteer).
+2. Wait until graph rendering completes (Export buttons appear).
+3. Trigger either export button:
+   - `Export JSON`
+   - `Export Markdown`
+4. Capture the downloaded file from the browser download directory.
+
+## Important notes
+- There is no official HTTP JSON API route; resolution happens in-browser.
+- Output depends on `python`, `platform`, `extras`, and `overrides`.
+- Project repository: https://github.com/chizkiyahu/pypi_graph

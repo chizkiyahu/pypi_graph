@@ -26,6 +26,19 @@
 
     <meta name="theme-color" content="#1e4b3d" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#101615" media="(prefers-color-scheme: dark)" />
+    <style>
+      .crawl-hidden-links {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+        border: 0;
+      }
+    </style>
 
     <!-- Structured Data — WebApplication -->
     <script type="application/ld+json">
@@ -116,6 +129,11 @@
     </script>
   </head>
   <body>
+    <nav class="crawl-hidden-links" aria-hidden="true">
+      <a href="/llms.txt">LLMs instructions</a>
+      <a href="/ai.txt">AI instructions</a>
+      <a href="/README.md">README</a>
+    </nav>
     <div id="app"></div>
     <noscript>
       <div style="max-width:600px;margin:4rem auto;font-family:system-ui,sans-serif;text-align:center;">

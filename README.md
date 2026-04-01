@@ -18,8 +18,13 @@
 - Evaluate extras, Python version markers, and platform markers in-browser.
 - Rebuild the graph when the top-level Python version, platform, or extras change.
 - Manually pin displayed dependency versions when the selected version is still legal under the active constraints.
+- Export the resolved graph as a machine-readable JSON file or a Markdown report.
 - Minimize repeat PyPI calls with an IndexedDB cache plus in-flight request deduplication.
 - Deploy as a static site with GitHub Actions and GitHub Pages.
+
+## AI-agent friendly docs
+
+- See [`public/llms.txt`](public/llms.txt) for automation tips and the stable URL/query contract agents can use.
 
 ## Resolution model
 
@@ -45,4 +50,3 @@ npm run build
 ## Keywords
 
 python dependency graph, pypi dependency tree, visualize pip dependencies, python package dependency checker, pip install dependency graph, python dependency tree viewer, pypi dependency explorer, interactive python dependency visualization
-
